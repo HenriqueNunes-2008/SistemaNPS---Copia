@@ -1,0 +1,1640 @@
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Ressalvas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+// const processoId = sessionStorage.getItem("processo_id");
+
+//if (!processoId || processoId === "undefined" || processoId === "null") {
+//    alert("Sessão inválida. Retorne ao Termo de Aceite.");
+//    sessionStorage.clear();
+//    window.location.href = "/termo";
+//}
+
+</script>
+
+<style>
+* { box-sizing: border-box; }
+/* ================= ACTION SHEET ================= */
+.sheet {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+}
+.sheet.active { display: flex; }
+
+.sheet-box {
+    background: #fff;
+    border-radius: 18px;
+    padding: 20px;
+    width: 280px;
+    text-align: center;
+}
+
+.sheet-box button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.btn-select { background:#4b49c8; color:#fff; 
+}
+.btn-camera { background:#0a287a; color:#fff; }
+.btn-cancel { background:#e5e7eb; }
+
+/* ================= FREEZE ANIMAÇÕES ================= */
+.freeze * {
+    animation: none !important;
+    transition: none !important;
+}
+/* ================= BODY ================= */
+body {
+    margin: 0;
+    font-family: 'Inter', Arial, sans-serif;
+    background: linear-gradient(90deg, #0093dd 30%, #5b2fa6);
+    padding-top: 120px;
+}
+
+/* ================= TOPBAR ================= */
+.topbar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 120px;
+    background: #ffffff;
+    z-index: 40;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border-radius: 0 0 50px 50px;
+}
+
+.logo-fixed {
+    position: absolute;
+    top: 50%;
+    left: 1%;
+    transform: translateY(-50%);
+    height: 255%;
+    pointer-events: none;
+}
+
+.logo-link {
+    position: absolute;
+    top: 50%;
+    left: calc(1% + 85px);
+    transform: translateY(-50%);
+    width: 190px;
+    height: 50px;
+    z-index: 45;
+    display: block;
+}
+
+.topbar-content {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 60px 0 200px;
+}
+
+.logout-link {
+    color: #1e3a8a;
+    font-weight: 800;
+    text-decoration: none;
+    margin-left: 20px;
+    font-size: 14px;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 32px;                 /* espaço entre endereço e contato */
+    font-size: 14px;
+    margin-right: 5%;
+    color: #1e3a8a;
+    line-height: 1.4;
+}
+
+.header-info .address {
+    text-align: left;
+}
+@media (max-width: 1240px) {
+
+    .topbar {
+        height: 100px;
+        border-radius: 0 0 32px 32px;
+    }
+
+    .logo-fixed {
+        height: 200%;
+        left: 16px;
+    }
+    .logo-link { left: calc(16px + 75px); }
+
+    .header-info {
+        font-size: 12px;
+        gap: 16px;
+    }
+
+    .header-info .address {
+        line-height: 1.2;
+    }
+
+    .topbar-content {
+        padding: 0 24px 0 140px;
+    }
+}
+
+/* ================= CONTAINER PADRÃO ================= */
+.page-container {
+    max-width: 900px; /* mesmo valor usado no Termo de Aceite */
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* ================= BREADCRUMB ================= */
+.breadcrumb-wrapper {
+    max-width: 900px;        /* MESMO valor do main */
+    margin: 24px auto 16px;  /* centraliza */
+    padding: 0;              /* igual ao main */
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.breadcrumb-item {
+    font-weight: 800;
+    color: #e0e7ff;
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: #fde047;
+}
+
+.breadcrumb-arrow {
+    width: 28px;
+    height: auto;
+}
+
+/* ================= TITULO ================= */
+.title h1 {
+    color: #ffffff;
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+.title span {
+    background: #ffffff;
+    color: #411f7c;
+    font-weight: 800;
+    padding: 6px 14px;
+    display: inline-block;
+    font-size: 26px;
+    font-style: italic;
+}
+
+/* ================= CARD ================= */
+.card {
+    background: #e9f0fb;
+    border-radius: 26px;
+    padding: 32px;
+    margin-top: 30px;
+}
+
+/* ================= TABELA ================= */
+.table-header,
+.table-row {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr 0.8fr 0.9fr 1fr;
+    gap: 8px;
+}
+
+.table-header {
+    font-size: 13px;
+    font-weight: 800;
+    color: #1e3a8a;
+    margin-bottom: 12px;
+}
+
+.table-row { height: 56px; }
+
+.field-wrap {
+    min-width: 0;
+}
+
+.field-label-mobile {
+    display: none;
+}
+
+input {
+    width: 100%;
+    height: 48px;
+    border-radius: 10px;
+    border: none;
+    background: #b8c9e0;
+    padding: 10px 12px;
+}
+
+select.regiao-foto {
+    width: 100%;
+    height: 48px;
+    border-radius: 10px;
+    border: none;
+    background: #b8c9e0;
+    padding: 10px 12px;
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+/* ================= IMAGE ================= */
+.image-box {
+    height: 48px;
+    background: #e5e7eb;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    padding-right: 15%;
+    padding-left: 15%;
+    text-align: center;
+}
+
+.image-box.drag-over {
+    outline: 3px dashed #4b49c8;
+    background: #eef2ff;
+}
+
+.image-cell {
+    display: flex;
+    align-items: center;   /* alinhamento vertical */
+    gap: 6px;
+    height: 48px;          /* igual aos inputs */
+}
+
+.image-cell .remove {
+    margin-top: 0;         /* remove deslocamento vertical */
+}
+
+.remove {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #d1d5db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* ================= BOTÕES ================= */
+.add-item {
+    margin: 24px auto;
+    display: block;
+    background: #4b49c8;
+    color: #fff;
+    border: none;
+    padding: 12px 26px;
+    font-weight: 800;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+button.save {
+    background: #0a287a;
+    color: #fff;
+    border: none;
+    padding: 14px 28px;
+    font-weight: 800;
+    font-style: italic;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 0;
+}
+#pdf-area {
+    background: transparent;  /* IMPORTANTE para PDF */
+    max-width: 900px;
+    margin: 0 auto 60px;
+    padding: 0;
+    border-radius: 0;           /* IMPORTANTE para PDF */
+    scale: 1;       /* força fundo até o fim */
+}
+
+.pdf-hide {
+    display: none !important;
+}
+
+
+button.save:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* ================= CPF ================= */
+input.cpf-invalido { border: 2px solid #dc2626; }
+input.cpf-valido { border: 2px solid #16a34a; }
+
+/* ================= ITEM DUPLICADO ================= */
+input.item-duplicado { border: 2px solid #dc2626; }
+
+/* ================= APROVAÇÃO ================= */
+.approval {
+    margin-top: 28px;
+    background: #e9f0fb;
+    padding: 24px;
+    border-radius: 26px;
+}
+
+.approval-fields {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    justify-content: space-between;
+}
+.approval-fields label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #1f2937;
+}
+.approval-fields input {
+    flex: 1;
+    border: none;
+    border-bottom: 1px solid #64748b;
+    background: transparent;
+    padding: 6px 4px;
+    font-size: 14px;
+}
+
+/* ================= FOOTER ================= */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 900px;
+    margin: 20px auto 0;
+    padding: 0;
+}
+
+.footer img { width: 420px; }
+
+.mobile-contact-info {
+    display: none;
+    text-align: center;
+    color: #e2e8f0;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+/* ================= CAPTURE MODE ================= */
+.capture-mode .breadcrumb-wrapper,
+.capture-mode .footer,
+.capture-mode .add-item,
+.capture-mode .remove {
+    display: none !important;
+}
+
+/* ================= MODAL ================= */
+.modal img {
+    background: #e5e7eb; /* cinza claro */
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal.active { display: flex; }
+.modal img { max-width: 85vw; max-height: 85vh; }
+.close {
+    position: absolute;
+    top: 24px;
+    right: 32px;
+    font-size: 38px;
+    color: #fff;
+    cursor: pointer;
+}
+
+#cameraModal {
+    flex-direction: column;
+    gap: 14px;
+}
+
+#cameraModal #video {
+    width: min(92vw, 720px);
+    max-height: 70vh;
+    border-radius: 12px;
+    background: #000;
+}
+
+#captureBtn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    background: #0093dd;
+    color: #fff;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+#captureBtn.hidden {
+    display: none;
+}
+
+/* Modal de Logout */
+.modal-logout {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+.modal-logout-content {
+    background: #fff;
+    border: 2px solid #dc2626;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+.modal-logout-text {
+    color: #dc2626;
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+.modal-logout-sub {
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 14px;
+}
+.btn-logout-confirm { background: #dc2626; color: #fff; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+.btn-logout-cancel { background: #e5e7eb; color: #374151; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-right: 10px; }
+
+.saving-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.52);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 12000;
+}
+
+.saving-overlay.active { display: flex; }
+
+.saving-box {
+    width: min(92vw, 420px);
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px 18px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.28);
+}
+
+.saving-spinner {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    border: 4px solid #dbeafe;
+    border-top-color: #1d4ed8;
+    animation: spin 0.9s linear infinite;
+}
+
+.saving-title { color: #0f172a; font-weight: 800; font-size: 16px; }
+.saving-text { color: #334155; margin-top: 6px; font-size: 13px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+    html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    body {
+        padding-top: 118px;
+    }
+
+    .topbar {
+        height: auto;
+        min-height: 96px;
+        border-radius: 0 0 28px 28px;
+        padding: 10px 14px;
+    }
+
+    .logo-fixed {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: 72px;
+    }
+
+    .logo-link {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 240px;
+        height: 72px;
+    }
+
+    .topbar-content {
+        height: 100%;
+        padding: 0 6px;
+        justify-content: flex-end;
+    }
+
+    .header-info {
+        width: auto;
+        margin: 0;
+        padding-left: 0;
+        gap: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    .header-info .address,
+    .header-info .contact {
+        display: none;
+    }
+
+    .logout-link {
+        margin: 0;
+        font-size: 15px;
+    }
+
+    .breadcrumb-wrapper {
+        margin: 16px auto 12px;
+        padding: 0 14px;
+        max-width: 100%;
+    }
+
+    .breadcrumb {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .breadcrumb-arrow {
+        width: 20px;
+    }
+
+    .page-container,
+    main {
+        max-width: 100%;
+        padding: 0 14px;
+    }
+
+    .footer {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        padding: 0 14px 24px;
+    }
+
+    .footer img {
+        display: none;
+    }
+
+    .footer .save {
+        margin: 0 auto;
+    }
+
+    .mobile-contact-info {
+        display: block;
+        max-width: 360px;
+    }
+
+    /* Ajuste para campos de ressalva em mobile */
+    .table-header {
+        display: none;
+    }
+    .table-row {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        height: auto;
+        padding-bottom: 28px;
+        margin-bottom: 22px;
+        border-bottom: 1px solid #d1d5db;
+    }
+    .field-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .field-label-mobile {
+        display: block;
+        font-size: 12px;
+        font-weight: 800;
+        color: #1e3a8a;
+        letter-spacing: 0.2px;
+        padding-left: 2px;
+    }
+    .table-row input,
+    .table-row select.regiao-foto,
+    .table-row .image-box,
+    .table-row .image-cell {
+        height: 52px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div id="savingOverlay" class="saving-overlay">
+    <div class="saving-box">
+        <div class="saving-spinner"></div>
+        <div class="saving-title">Salvando processo</div>
+        <div class="saving-text" id="savingText">Aguarde, estamos atualizando os PDFs.</div>
+    </div>
+</div>
+
+<div class="topbar">
+    <img src="/static/LogoFlexcolor2.png" class="logo-fixed" alt="Logo">
+    <a href="/" class="logo-link" aria-label="Página inicial"></a>
+    <div class="topbar-content">
+        <div class="header-info">
+            <div class="address">
+                R. José Antônio Valadares, 285 – Vila Liviero<br>
+                São Paulo – SP. CEP: 04185-020
+            </div>
+
+            <div class="contact">
+                <span class="email">comercial@soukure.com.br</span><br>
+                <span class="phone">(11) 2372-7444</span>
+            </div>
+            <a href="#" onclick="openLogoutModal(event)" class="logout-link">SAIR</a>
+        </div>
+    </div>
+</div>
+
+<div class="breadcrumb-wrapper">
+    <nav class="breadcrumb">
+        <a href="/index" class="breadcrumb-item" id="bc-home">Página Inicial</a>
+        <img src="/static/arrow.png" class="breadcrumb-arrow">
+        <a href="/termo" class="breadcrumb-item" id="bc-termo">Termo de Aceite</a>
+        <img src="/static/arrow.png" class="breadcrumb-arrow">
+        <div class="breadcrumb-item active">Ressalva</div>
+        <img src="/static/arrow.png" class="breadcrumb-arrow" id="bc-nps-arrow">
+        <a href="/nps" class="breadcrumb-item" id="bc-nps">NPS</a>
+    </nav>
+</div>
+
+<main id="pdf-area">
+    <div class="page-container">
+        <section class="title">
+            <h1>RESSALVAS ENCONTRADAS:</h1>
+        </section>
+
+        <section class="card">
+            <div class="table-header">
+            <div>DESCRIÇÃO</div>
+            <div>PRAZO</div>
+            <div>RESPONSÁVEL</div>
+            <div>
+                <div style="font-weight:800;margin-bottom:6px;">FOTOS</div>
+            </div>
+            <div>OBSERVAÇÃO</div>
+        </div>
+            <div id="tableBody"></div>
+            <button class="add-item" onclick="addRow()">ADICIONAR ITEM +</button>
+        </section>
+
+        <section class="approval admin-only" id="approvalSection" style="display:none;">
+            <strong>APROVAÇÃO FINAL DAS RESSALVAS:</strong>
+            <div class="approval-fields">
+                <label>REPRESENTANTE</label>
+                <input type="text" placeholder="REPRESENTANTE">
+                <label>CPF</label>
+                <input type="text" placeholder="CPF">
+            </div>
+        </section>
+    </div>
+</main>
+<div class="footer">
+    <button type="submit" id="btnSalvar" class="save" disabled>SALVAR RESSALVA</button>
+
+    <img src="/static/logozinha.png" alt="Fleximedical_logo" class="footer-logo">
+    <div class="mobile-contact-info">
+        <div>R. José Antônio Valadares, 285 – Vila Liviero, São Paulo – SP. CEP: 04185-020</div>
+        <div>comercial@soukure.com.br<br>(11) 2372-7444</div>
+    </div>
+</div>
+<div class="modal" id="imageModal" onclick="closeModal()">
+    <span class="close">&times;</span>
+    <img id="modalImg">
+</div>
+<script>
+function openLogoutModal(e) {
+    if(e) e.preventDefault();
+    document.getElementById('logoutModal').style.display = 'flex';
+}
+function closeLogoutModal() {
+    document.getElementById('logoutModal').style.display = 'none';
+}
+function confirmLogout() {
+    window.location.href = '/logout';
+}
+
+/* CONFIRM SAVE SCRIPTS */
+function openConfirmSaveModal() {
+    document.getElementById('confirmSaveModal').style.display = 'flex';
+}
+function closeConfirmSaveModal() {
+    document.getElementById('confirmSaveModal').style.display = 'none';
+}
+
+let supervisorLinkToCopy = "";
+function openMotoristaDoneModal(link) {
+    supervisorLinkToCopy = link || "";
+    const modal = document.getElementById("motoristaDoneModal");
+    if (modal) modal.style.display = "flex";
+}
+function closeMotoristaDoneModal() {
+    const modal = document.getElementById("motoristaDoneModal");
+    if (modal) modal.style.display = "none";
+}
+async function copySupervisorLink() {
+    if (!supervisorLinkToCopy) return;
+    try {
+        await navigator.clipboard.writeText(supervisorLinkToCopy);
+        alert("Link copiado.");
+    } catch (_) {
+        prompt("Copie o link:", supervisorLinkToCopy);
+    } finally {
+        window.location.href = "/login";
+    }
+}
+
+document.getElementById("btnSalvar").addEventListener("click", function () {
+    if (this.disabled) return;
+    openConfirmSaveModal();
+});
+
+async function executarSalvarRessalvas() {
+    closeConfirmSaveModal();
+    if (!isAdmin && userEditLocked) {
+        alert("Edicao bloqueada para este processo. Solicite liberacao ao admin.");
+        return;
+    }
+    if (isAdmin && adminTokenFinalizado) {
+        alert("Token expirado: o admin pode apenas visualizar este processo.");
+        return;
+    }
+
+    const btn = document.getElementById("btnSalvar");
+    const savingOverlay = document.getElementById("savingOverlay");
+    const savingText = document.getElementById("savingText");
+    btn.dataset.locked = "true";
+    btn.disabled = true;
+    btn.textContent = "SALVANDO...";
+    savingText.textContent = "Aguarde, estamos salvando as ressalvas e regenerando os PDFs.";
+    savingOverlay.classList.add("active");
+
+    document.body.classList.add("freeze");
+
+    try {
+        /* 1. Captura area (SEM esconder UI ainda) */
+        const area = document.getElementById("pdf-area");
+
+        area.classList.add("capture-mode");
+        await new Promise(r => requestAnimationFrame(r));
+
+        const canvas = await html2canvas(area, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            ignoreElements: (el) => el.tagName === "VIDEO" || el.id === "video"
+        });
+
+        area.classList.remove("capture-mode");
+
+        const capturaBase64 = canvas.toDataURL("image/jpeg", 0.92);
+
+
+
+        /* 3. Coleta imagens */
+        const imagens = [];
+        document.querySelectorAll(".table-row").forEach((row, index) => {
+           const inputs = row.querySelectorAll("input");
+           const descricao = inputs[0]?.value || "";
+           const prazo = inputs[1]?.value || "";
+           const responsavel = inputs[2]?.value || "";
+           const obs = row.querySelector(".observacao")?.value || null;
+
+            const box = row.querySelector(".image-box");
+
+            imagens.push({
+                item: index + 1,
+                descricao,
+                prazo,
+                responsavel,
+                observacao: obs,
+                imagem: box.dataset.image
+            });
+        });
+
+        /* 4. Valida processo_id antes de enviar */
+        const processoId = processoParam || processoEmAndamento || projectTokenParam;
+        if (!processoId || processoId === "undefined" || processoId === "null") {
+            alert("Processo inválido. Refaça o Termo de Aceite.");
+
+            btn.disabled = false;
+            btn.textContent = "SALVAR RESSALVA";
+            delete btn.dataset.locked;
+            document.body.classList.remove("freeze");
+            savingOverlay.classList.remove("active");
+
+            return;
+        }
+
+        /* 5. Envia para backend */
+    const endpoint = isAdmin
+        ? (isEditMode ? "/ressalvas/atualizar" : "/ressalvas/salvar")
+        : "/ressalvas/atualizar";
+    const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+   body: JSON.stringify({
+    processo_id: processoId.trim(),
+    responsavel: (document.querySelector('section.approval input[placeholder="REPRESENTANTE"]')?.value || ""),
+    cpf: (document.querySelector('section.approval input[placeholder="CPF"]')?.value || ""),
+    observacoes: null,
+    imagens: imagens.map(img => ({
+        item: String(img.item),
+        descricao: img.descricao,
+        prazo: img.prazo || null,
+        responsavel: img.responsavel,
+        observacao: img.observacao,
+        aprovacao: false,
+        imagem_base64: img.imagem
+    }))
+})
+});
+
+if (!response.ok) {
+    const result = await response.json();
+
+    let mensagem = "Erro ao salvar ressalvas";
+
+    if (Array.isArray(result?.detail)) {
+        mensagem = result.detail
+            .map(e => e.msg)
+            .join("\n");
+    } else if (typeof result?.detail === "string") {
+        mensagem = result.detail;
+    }
+
+    throw new Error(mensagem);
+}
+
+
+const fluxoToken = processoId.trim();
+if (fluxoToken) {
+    saveCurrentProcessId(fluxoToken);
+}
+await carregarEdicaoRessalvas(fluxoToken);
+
+delete btn.dataset.locked;
+btn.textContent = "SALVAR RESSALVA";
+btn.disabled = !validarFormulario();
+document.body.classList.remove("freeze");
+savingOverlay.classList.remove("active");
+if (!isAdmin && userFlow === "motorista") {
+    const link = `${window.location.origin}/login?project_token=${encodeURIComponent(projectTokenParam || processoId || "")}`;
+    openMotoristaDoneModal(link);
+    return;
+}
+if (!isAdmin || (isAdmin && isEditMode)) {
+    window.location.href = buildFlowUrl("/nps");
+    return;
+}
+
+
+
+    } catch (err) {
+    console.error(err);
+
+    alert(err.message || "Erro ao salvar ressalvas");
+
+    /* reativa botão */
+    btn.disabled = false;
+    btn.textContent = "SALVAR RESSALVA";
+    delete btn.dataset.locked;
+
+    document.body.classList.remove("freeze");
+    savingOverlay.classList.remove("active");
+
+    /* garante que UI esteja visível */
+    document.querySelector(".topbar")?.classList.remove("pdf-hide");
+    document.querySelector(".footer")?.classList.remove("pdf-hide");
+    document.querySelector(".breadcrumb-wrapper")?.classList.remove("pdf-hide");
+}
+}
+</script>
+<script>
+
+    
+const tableBody = document.getElementById('tableBody');
+const btnSalvar = document.getElementById('btnSalvar');
+
+const urlParams = new URLSearchParams(window.location.search);
+const processoParam = urlParams.get("processo");
+const projectTokenParam = urlParams.get("project_token") || "{{ project_token or '' }}";
+const returnTo = urlParams.get("return");
+const isEditMode = Boolean(processoParam);
+let isAdmin = returnTo === "/admin" && "{{ is_admin }}" === "True";
+let adminTokenFinalizado = false;
+let userEditLocked = false;
+const userFlowCookie = (getCookieValue("nps_tipo_acesso") || "").toLowerCase();
+const userFlow = ["cliente", "motorista"].includes(userFlowCookie) ? userFlowCookie : "";
+const cpfInput = document.querySelector('section.approval input[placeholder="CPF"]');
+let processoEmAndamento = null;
+
+function getCookieValue(name) {
+    const key = `${name}=`;
+    const cookies = document.cookie ? document.cookie.split(";") : [];
+    for (const rawCookie of cookies) {
+        const cookie = rawCookie.trim();
+        if (cookie.startsWith(key)) {
+            return decodeURIComponent(cookie.substring(key.length));
+        }
+    }
+    return "";
+}
+
+function getProgressStorageKey() {
+    const usuario = getCookieValue("nps_user") || "anon";
+    return `nps_project_token::${usuario}`;
+}
+
+function getCurrentProcessId() {
+    return localStorage.getItem(getProgressStorageKey()) || sessionStorage.getItem("project_token");
+}
+
+function saveCurrentProcessId(processoId) {
+    if (!processoId) return;
+    localStorage.setItem(getProgressStorageKey(), processoId);
+    sessionStorage.setItem("project_token", processoId);
+}
+
+function clearCurrentProcessId() {
+    localStorage.removeItem(getProgressStorageKey());
+    sessionStorage.removeItem("project_token");
+}
+
+function processoTokenFinalizado(data) {
+    if (!data || typeof data !== "object") return false;
+    return data.project_token_ativo === false || Boolean(data.project_token_expira_em);
+}
+
+function processoEdicaoBloqueada(data) {
+    const npsDados = data && typeof data === "object" ? (data.nps_dados || {}) : {};
+    return Boolean(npsDados && (npsDados._lock_ressalvas || npsDados._edicao_bloqueada));
+}
+
+async function resolveDraftProcessId() {
+    const draftId = getCurrentProcessId();
+    if (!draftId) return null;
+    try {
+        const res = await fetch(`/api/processos/${draftId}`);
+        if (!res.ok) {
+            clearCurrentProcessId();
+            return null;
+        }
+        const data = await res.json();
+        if ((data?.status || "").toLowerCase() === "finalizado") {
+            clearCurrentProcessId();
+            return null;
+        }
+        return draftId;
+    } catch {
+        clearCurrentProcessId();
+        return null;
+    }
+}
+
+async function resolveDraftFromServer() {
+    try {
+        const res = await fetch("/api/processos/ultimo-em-andamento");
+        if (!res.ok) return null;
+        const data = await res.json();
+        const processoId = data?.processo_id;
+        if (!processoId) return null;
+        saveCurrentProcessId(processoId);
+        return processoId;
+    } catch {
+        return null;
+    }
+}
+
+let currentBox = null;
+let stream = null;
+
+function addRow(item = null) {
+    const row = document.createElement('div');
+    row.className = 'table-row';
+    row.innerHTML = `
+    <div class="field-wrap">
+        <span class="field-label-mobile">DESCRIÇÃO</span>
+        <input placeholder="Descricao da ressalva">
+    </div>
+    <div class="field-wrap">
+        <span class="field-label-mobile">PRAZO</span>
+        <input type="date" placeholder="Prazo">
+    </div>
+    <div class="field-wrap">
+        <span class="field-label-mobile">RESPONSÁVEL</span>
+        <input placeholder="Responsavel">
+    </div>
+    <div class="field-wrap">
+        <span class="field-label-mobile">FOTOS</span>
+        <div class="image-cell">
+            <div class="image-box" onclick="imageClick(this)">
+                + IMAGEM
+            </div>
+            <div class="remove"
+                 onclick="this.closest('.table-row').remove(); btnSalvar.disabled = !validarFormulario();">&times;</div>
+        </div>
+    </div>
+    <div class="field-wrap">
+        <span class="field-label-mobile">OBSERVAÇÃO</span>
+        <input class="observacao" placeholder="Observação">
+    </div>
+		`;
+
+function enableDragAndDrop(box) {
+    box.addEventListener("dragover", e => {
+        e.preventDefault();
+        box.classList.add("drag-over");
+    });
+
+    box.addEventListener("dragleave", () => {
+        box.classList.remove("drag-over");
+    });
+
+    box.addEventListener("drop", e => {
+        e.preventDefault();
+        box.classList.remove("drag-over");
+
+        const file = e.dataTransfer.files[0];
+        if (!file || !file.type.startsWith("image/")) {
+            alert("Arraste apenas imagens");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = ev => {
+            box.dataset.image = ev.target.result;
+            box.textContent = "VER IMAGEM";
+            btnSalvar.disabled = !validarFormulario();
+        };
+        reader.readAsDataURL(file);
+    });
+}
+    tableBody.appendChild(row);
+const imageBox = row.querySelector(".image-box");
+enableDragAndDrop(imageBox);
+    // Add input listeners to the new row inputs
+    const inputs = row.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            btnSalvar.disabled = !validarFormulario();
+        });
+        input.addEventListener('change', () => {
+            btnSalvar.disabled = !validarFormulario();
+        });
+    });
+
+    // Add change listener to the select
+    const select = row.querySelector('.regiao-foto');
+    if (select) {
+        select.addEventListener('change', () => {
+            btnSalvar.disabled = !validarFormulario();
+        });
+    }
+
+    if (item) {
+        const rowInputs = row.querySelectorAll("input");
+        rowInputs[0].value = item.descricao || "";
+        rowInputs[1].value = item.prazo || "";
+        rowInputs[2].value = item.responsavel || "";
+        const obsInput = row.querySelector(".observacao");
+        if (obsInput) obsInput.value = item.observacao || "";
+        if (item.imagem_base64) {
+            imageBox.dataset.image = item.imagem_base64;
+            imageBox.textContent = "VER IMAGEM";
+        }
+    }
+
+    btnSalvar.disabled = !validarFormulario();
+}
+
+function imageClick(box) {
+    currentBox = box;
+    if (!box.dataset.image) {
+        document.getElementById('actionSheet').classList.add('active');
+    } else {
+        document.getElementById('modalImg').src = box.dataset.image;
+        document.getElementById('imageModal').classList.add('active');
+    }
+}
+
+function selectFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = () => loadFile(input.files[0]);
+    input.click();
+    closeSheet();
+}
+
+function loadFile(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        currentBox.dataset.image = e.target.result;
+        currentBox.textContent = 'VER IMAGEM';
+        btnSalvar.disabled = !validarFormulario();
+    };
+    reader.readAsDataURL(file);
+}
+
+function openCamera() {
+    closeSheet();
+    if (!currentBox) {
+        alert("Selecione o campo de imagem antes de abrir a câmera.");
+        return;
+    }
+
+    const row = currentBox.closest(".table-row");
+    const obs = row?.querySelector(".observacao")?.value;
+    if (!obs) {
+        alert("Preencha a observação antes de tirar a foto.");
+        return;
+    }
+
+    const aplicarStream = (cameraStream) => {
+        stream = cameraStream;
+        const video = document.getElementById('video');
+        const captureBtn = document.getElementById('captureBtn');
+        video.srcObject = stream;
+        captureBtn.classList.remove('hidden');
+        document.getElementById('cameraModal').classList.add('active');
+    };
+
+    navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } }
+    })
+        .then(aplicarStream)
+        .catch(() => {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(aplicarStream)
+                .catch(() => alert('Câmera não disponível'));
+        });
+}
+
+function takePhoto() {
+    const video = document.getElementById('video');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    currentBox.dataset.image = canvas.toDataURL('image/png');
+    currentBox.textContent = 'VER IMAGEM';
+    closeCamera();
+    btnSalvar.disabled = !validarFormulario();
+}
+
+function closeCamera() {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    const video = document.getElementById('video');
+    const captureBtn = document.getElementById('captureBtn');
+    video.srcObject = null;
+    captureBtn.classList.add('hidden');
+    document.getElementById('cameraModal').classList.remove('active');
+}
+
+function closeSheet() {
+    document.getElementById('actionSheet').classList.remove('active');
+}
+
+function closeModal() {
+    document.getElementById('imageModal').classList.remove('active');
+}
+
+/* CPF */
+if (cpfInput) {
+    cpfInput.addEventListener('input', () => {
+        let v = cpfInput.value.replace(/\D/g, '').slice(0,11);
+        v = v.replace(/(\d{3})(\d)/, '$1.$2');
+        v = v.replace(/(\d{3})(\d)/, '$1.$2');
+        v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        cpfInput.value = v;
+
+        if (!v) {
+            cpfInput.classList.remove('cpf-valido');
+            cpfInput.classList.remove('cpf-invalido');
+            if (!btnSalvar.dataset.locked) {
+                btnSalvar.disabled = !validarFormulario();
+            }
+            return;
+        }
+
+        validarCPF(v);
+    });
+}
+
+function validarCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return setCPF(false);
+    let s = 0;
+    for (let i=0;i<9;i++) s += cpf[i]*(10-i);
+    let d1 = (s*10)%11; if (d1===10) d1=0;
+    if (d1!=cpf[9]) return setCPF(false);
+    s = 0;
+    for (let i=0;i<10;i++) s += cpf[i]*(11-i);
+    let d2 = (s*10)%11; if (d2===10) d2=0;
+    setCPF(d2==cpf[10]);
+}
+
+function validarFormulario() {
+    const rows = document.querySelectorAll(".table-row");
+    if (rows.length === 0) return false;
+
+    let temItemValido = false;
+
+    rows.forEach(row => {
+        const inputs = row.querySelectorAll("input");
+        const descricao = inputs[0]?.value.trim();
+        const prazo = inputs[1]?.value.trim();
+        const responsavel = inputs[2]?.value.trim();
+        const img = row.querySelector(".image-box")?.dataset.image;
+        const obs = row.querySelector(".observacao")?.value;
+
+        if (descricao && prazo && responsavel && img && obs) {
+            temItemValido = true;
+        }
+    });
+
+    return temItemValido;
+}
+
+function setCPF(ok){
+    if (!cpfInput) return;
+    if (cpfInput.value.trim() === "") {
+        cpfInput.classList.remove('cpf-valido');
+        cpfInput.classList.remove('cpf-invalido');
+    } else {
+        cpfInput.classList.toggle('cpf-valido', ok);
+        cpfInput.classList.toggle('cpf-invalido', !ok);
+    }
+
+    if (!btnSalvar.dataset.locked) {
+        btnSalvar.disabled = !validarFormulario();
+    }
+}
+
+function habilitarModoValidacaoUsuario() {
+    // Usuario apenas valida as ressalvas criadas pelo admin.
+    document.querySelectorAll(".add-item, .remove").forEach(el => {
+        el.style.display = "none";
+    });
+
+    document.querySelectorAll(".table-row").forEach((row) => {
+        row.querySelectorAll("input, select").forEach((el) => {
+            el.disabled = true;
+        });
+        const imageBox = row.querySelector(".image-box");
+        if (imageBox) {
+            imageBox.style.pointerEvents = "none";
+            imageBox.style.opacity = "0.85";
+        }
+    });
+
+    if (btnSalvar) {
+        btnSalvar.textContent = "VALIDAR RESSALVAS";
+        btnSalvar.disabled = !validarFormulario();
+    }
+}
+
+function habilitarModoRessalvasJaSalvasUsuario() {
+    document.querySelectorAll(".add-item, .remove").forEach(el => {
+        el.style.display = "none";
+    });
+
+    document.querySelectorAll(".table-row").forEach((row) => {
+        row.querySelectorAll("input, select, textarea, button").forEach((el) => {
+            el.disabled = true;
+        })
+        const imageBox = row.querySelector(".image-box");
+        if (imageBox) {
+            imageBox.style.pointerEvents = "none";
+            imageBox.style.opacity = "0.85";
+        }
+    });
+
+    if (btnSalvar) {
+        btnSalvar.textContent = "RESSALVAS JA SALVAS";
+        btnSalvar.disabled = true;
+    }
+}
+
+async function carregarEdicaoRessalvas(codigoProcesso) {
+    if (!codigoProcesso) return;
+    try {
+        const res = await fetch(`/ressalvas/dados/${codigoProcesso}?t=${new Date().getTime()}`);
+        if (!res.ok) return;
+        const json = await res.json();
+        const data = json.dados || json; // Garante acesso aos dados corretos
+        adminTokenFinalizado = isAdmin && processoTokenFinalizado(data);
+        userEditLocked = processoEdicaoBloqueada(data);
+        const statusEntrega = String(data?.status_entrega || "").toLowerCase();
+        const lockFlow = String(
+            data?.nps_dados?._lock_termo_por ||
+            data?.nps_dados?._lock_ressalvas_por ||
+            ""
+        ).toLowerCase();
+        const flowEfetivo = userFlow || (lockFlow === "motorista" ? "motorista" : "cliente");
+        const motoristaContext = !isAdmin && flowEfetivo === "motorista";
+        const concluidoSemRessalva = motoristaContext && statusEntrega === "concluido";
+        const approvalSection = document.getElementById("approvalSection");
+        if (approvalSection) {
+            approvalSection.style.display = isAdmin ? "" : "none";
+        }
+        if (motoristaContext) {
+            ocultarBreadcrumbNps();
+        } else if (!isAdmin) {
+            exibirBreadcrumbNps();
+        }
+
+        // Se o router retornar flat, usamos data. Se retornar aninhado (padrão Termo), usamos ressalvas_dados
+        const dados = data.ressalvas_dados || data;
+
+        if (isAdmin && (dados?.responsavel || dados?.cpf)) {
+            const rep = document.querySelector('section.approval input[placeholder="REPRESENTANTE"]');
+            const cpf = document.querySelector('section.approval input[placeholder="CPF"]');
+            if (rep) rep.value = dados.responsavel || "";
+            if (cpf) cpf.value = dados.cpf || "";
+        }
+
+        tableBody.innerHTML = "";
+        if (Array.isArray(dados?.itens) && dados.itens.length > 0) {
+            dados.itens.forEach((item) => addRow(item));
+        } else {
+            addRow();
+        }
+
+        if (adminTokenFinalizado) {
+            habilitarModoSomenteLeituraAdminTokenFinalizado();
+            return;
+        }
+        if (concluidoSemRessalva) {
+            habilitarModoRessalvasNaoEncontradas();
+            return;
+        }
+        if (userEditLocked && !isAdmin) {
+            habilitarModoSomenteLeituraUsuario();
+            if (btnSalvar) btnSalvar.textContent = "RESSALVAS SALVAS";
+            return;
+        }
+    } catch (e) {
+        console.warn("Falha ao carregar edicao", e);
+        addRow();
+    }
+}
+
+const roleCookie = (getCookieValue("nps_role") || "").toLowerCase();
+if (roleCookie === "admin" && (isEditMode || returnTo === "/admin")) {
+    isAdmin = true;
+}
+if (projectTokenParam && !isEditMode && returnTo !== "/admin") {
+    isAdmin = false;
+}
+
+function ocultarBreadcrumbNps() {
+    const bcNps = document.getElementById("bc-nps");
+    const bcNpsArrow = document.getElementById("bc-nps-arrow");
+    if (!bcNps) return;
+    if (bcNpsArrow) bcNpsArrow.style.display = "none";
+    bcNps.style.display = "none";
+}
+
+function exibirBreadcrumbNps() {
+    const bcNps = document.getElementById("bc-nps");
+    const bcNpsArrow = document.getElementById("bc-nps-arrow");
+    if (!bcNps) return;
+    if (bcNpsArrow) bcNpsArrow.style.display = "";
+    bcNps.style.display = "";
+}
+
+function habilitarModoSomenteLeituraUsuario() {
+    document.querySelectorAll(".add-item, .remove").forEach(el => {
+        el.style.display = "none";
+    });
+
+    document.querySelectorAll(".table-row").forEach((row) => {
+        row.querySelectorAll("input, select, textarea, button").forEach((el) => {
+            el.disabled = true;
+        })
+        const imageBox = row.querySelector(".image-box");
+        if (imageBox) {
+            imageBox.style.pointerEvents = "none";
+            imageBox.style.opacity = "0.85";
+        }
+    });
+
+    if (btnSalvar) {
+        btnSalvar.textContent = "RESSALVAS SALVAS";
+        btnSalvar.disabled = true;
+    }
+}
+
+function habilitarModoRessalvasNaoEncontradas() {
+    const approvalSection = document.querySelector("section.approval");
+    if (approvalSection) {
+        approvalSection.style.display = "none";
+    }
+    ocultarBreadcrumbNps();
+
+    document.querySelectorAll(".add-item, .remove").forEach(el => {
+        el.style.display = "none";
+    });
+
+    document.querySelectorAll(".table-row").forEach((row) => {
+        row.querySelectorAll("input, select, textarea, button").forEach((el) => {
+            el.disabled = true;
+        });
+        const imageBox = row.querySelector(".image-box");
+        if (imageBox) {
+            imageBox.style.pointerEvents = "none";
+            imageBox.style.opacity = "0.85";
+        }
+    });
+
+    if (btnSalvar) {
+        btnSalvar.textContent = "Ressalvas não encontradas";
+        btnSalvar.disabled = true;
+        btnSalvar.dataset.locked = "true";
+    }
+}
+
+function habilitarModoSomenteLeituraAdminTokenFinalizado() {
+    document.querySelectorAll(".add-item, .remove").forEach(el => {
+        el.style.display = "none";
+    });
+
+    document.querySelectorAll(".table-row").forEach((row) => {
+        row.querySelectorAll("input, select, textarea, button").forEach((el) => {
+            el.disabled = true;
+        });
+        const imageBox = row.querySelector(".image-box");
+        if (imageBox) {
+            imageBox.style.pointerEvents = "none";
+            imageBox.style.opacity = "0.85";
+        }
+    });
+
+    if (btnSalvar) {
+        btnSalvar.textContent = "VISUALIZACAO - TOKEN EXPIRADO";
+        btnSalvar.disabled = true;
+        btnSalvar.dataset.locked = "true";
+    }
+}
+
+function buildFlowUrl(path) {
+    const qs = new URLSearchParams();
+    if (isAdmin) {
+        const fluxo = processoParam || projectTokenParam || getCurrentProcessId();
+        if (fluxo) qs.set("processo", fluxo);
+        qs.set("return", "/admin");
+        return `${path}?${qs.toString()}`;
+    }
+    const fluxo = projectTokenParam || getCurrentProcessId();
+    if (fluxo) qs.set("project_token", fluxo);
+    return qs.toString() ? `${path}?${qs.toString()}` : path;
+}
+
+
+/* linha inicial */
+async function inicializarPagina() {
+    const bcHome = document.getElementById("bc-home");
+    const bcTermo = document.getElementById("bc-termo");
+    const bcNps = document.getElementById("bc-nps");
+    const approvalSection = document.getElementById("approvalSection");
+    if (bcHome) bcHome.href = isAdmin ? "/admin" : buildFlowUrl("/index");
+    if (bcTermo) bcTermo.href = buildFlowUrl("/termo");
+    if (bcNps) bcNps.href = buildFlowUrl("/nps");
+    if (approvalSection) {
+        approvalSection.style.display = isAdmin ? "" : "none";
+    }
+    if (userFlow === "motorista" && bcNps) {
+        ocultarBreadcrumbNps();
+    } else if (!isAdmin && bcNps) {
+        exibirBreadcrumbNps();
+    }
+
+    if (!isAdmin && projectTokenParam && !isEditMode && window.location.search.includes("project_token=")) {
+        window.history.replaceState({}, "", "/ressalvas");
+    }
+
+    processoEmAndamento = isEditMode
+        ? null
+        : (projectTokenParam || (await resolveDraftProcessId()) || await resolveDraftFromServer());
+    if (!isAdmin) {
+        document.querySelectorAll(".admin-only").forEach((el) => {
+            el.style.display = "none";
+        });
+        document.querySelectorAll(".admin-only input, .admin-only textarea, .admin-only select").forEach((el) => {
+            el.disabled = true;
+        });
+    }
+    carregarEdicaoRessalvas(isEditMode ? processoParam : processoEmAndamento);
+    btnSalvar.disabled = !validarFormulario();
+}
+
+inicializarPagina();
+
+</script>
+
+<!-- MODAL CONFIRM SAVE -->
+<div id="confirmSaveModal" class="modal-logout" style="display: none;">
+    <div class="modal-logout-content" style="border-color: #ff7a1a;">
+        <div class="modal-logout-text" style="color: #ff7a1a;">ATENÇÃO</div>
+        <p class="modal-logout-sub">Tem certeza de que deseja enviar?<br>Depois de salvar não será possível realizar alterações.</p>
+        <button onclick="closeConfirmSaveModal()" class="btn-logout-cancel">Voltar</button>
+        <button onclick="executarSalvarRessalvas()" class="btn-logout-confirm" style="background-color: #ff7a1a;">Salvar</button>
+    </div>
+</div>
+
+<!-- MODAL CAMERA -->
+<div class="modal" id="cameraModal">
+    <span class="close" onclick="closeCamera()">&times;</span>
+    <video id="video" autoplay></video>
+    <button id="captureBtn" class="hidden" onclick="takePhoto()">Capturar</button>
+</div>
+
+<!-- MODAL MOTORISTA FINAL -->
+<div id="motoristaDoneModal" class="modal-logout" style="display: none;">
+    <div class="modal-logout-content" style="border-color:#0f766e;">
+        <div class="modal-logout-text" style="color:#0f766e;">Concluido</div>
+        <p class="modal-logout-sub">Obrigado por concluir o Termo! Copie o link de acesso e mande ao seu supervisor para concluir a pesquisa NPS.</p>
+        <button type="button" class="btn-logout-cancel" onclick="closeMotoristaDoneModal()">Fechar</button>
+        <button type="button" class="btn-logout-confirm" style="background:#0f766e;" onclick="copySupervisorLink()">Copiar link</button>
+    </div>
+</div>
+
+
+<!-- ACTION SHEET -->
+<div class="sheet" id="actionSheet">
+    <div class="sheet-box">
+        <button class="btn-select" onclick="selectFile()">Selecionar imagem</button>
+        <button class="btn-camera" onclick="openCamera()">Tirar foto</button>
+        <button class="btn-cancel" onclick="closeSheet()">Cancelar</button>
+    </div>
+</div>
+
+<!-- MODAL LOGOUT -->
+<div id="logoutModal" class="modal-logout" style="display: none;">
+    <div class="modal-logout-content">
+        <div class="modal-logout-text">ATENÇÃO</div>
+        <p class="modal-logout-sub">Tem certeza que deseja sair da sua conta? Lembre-se de salvar as requisições para registro.</p>
+        <button onclick="closeLogoutModal()" class="btn-logout-cancel">Cancelar</button>
+        <button onclick="confirmLogout()" class="btn-logout-confirm">SAIR</button>
+    </div>
+</div>
+
+</body>
+</html>

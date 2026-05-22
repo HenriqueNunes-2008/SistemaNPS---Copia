@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+supabase
+reportlab
+httpx
+jinja2
+python-multipart
+pydantic
+python-dotenv
+PyPDF2
