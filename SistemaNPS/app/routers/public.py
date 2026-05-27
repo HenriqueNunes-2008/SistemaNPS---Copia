@@ -16,6 +16,8 @@ from app.models import Perfil, Processo, ConfiguracaoSegura, ProjetoFoto
 # Adicionamos o servico de upload (assumindo que existe em app.services.upload)
 from app.services.upload import upload_pdf
 from app.services.processo_repository import ProcessoRepository
+from app.routers.utils import parse_json_object
+from app.routers.security import is_admin_activation_granted, is_admin_mode_request, get_admin_cookie_secret
 import os
 from urllib.parse import urlparse # Importar urlparse
 
@@ -89,14 +91,6 @@ def _append_project_token(url: str, token: str) -> str:
     return f"{url}{sep}project_token={token}"
 
 
-def _get_admin_cookie_secret() -> str:
-    return (
-        os.getenv("ADMIN_ACTIVATION_COOKIE_SECRET")
-        or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-        or ""
-    )
-
-
 def _get_admin_activation_hash() -> str:
     """Busca o hash da senha administrativa no PostgreSQL."""
     with SessionLocal() as session:
@@ -107,35 +101,27 @@ def _get_admin_activation_hash() -> str:
     return (os.getenv("ADMIN_ACTIVATION_HASH") or "").strip()
 
 
-def _verify_admin_activation_password(password: str) -> bool:
-    """
-    Expected format for ADMIN_ACTIVATION_HASH:
-    pbkdf2_sha256$<iterations>$<salt_base64>$<hash_base64>
-    """
-    encoded = _get_admin_activation_hash()
-    if not encoded:
+def _verify_password(password: str, encoded_hash: str) -> bool:
+    """Verifica se a senha coincide com o hash pbkdf2_sha256."""
+    if not encoded_hash:
         return False
-
-    parts = encoded.split("$")
+    parts = encoded_hash.split("$")
     if len(parts) != 4 or parts[0] != "pbkdf2_sha256":
         return False
     _, iter_str, salt_b64, hash_b64 = parts
-
     try:
         iterations = int(iter_str)
         salt = base64.b64decode(salt_b64.encode("utf-8"))
         expected = base64.b64decode(hash_b64.encode("utf-8"))
     except Exception:
         return False
-
-    derived = hashlib.pbkdf2_hmac(
-        "sha256",
-        password.encode("utf-8"),
-        salt,
-        iterations,
-        dklen=len(expected),
-    )
+    derived = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations, dklen=len(expected))
     return hmac.compare_digest(derived, expected)
+
+
+def _verify_admin_activation_password(password: str) -> bool:
+    """Fallback para validar contra a senha global configurada no .env."""
+    return _verify_password(password, _get_admin_activation_hash())
 
 
 def _verify_admin_email_role(email: str) -> bool:
@@ -147,13 +133,23 @@ def _verify_admin_email_role(email: str) -> bool:
         return False
 
 @router.post("/registrar")
-def registrar_usuario(email: str = Form(...), password: str = Form(...)):
-    """Cria conta com status 'pendente' para aprovação posterior."""
+def registrar_usuario(nome: str = Form(...), email: str = Form(...), password: str = Form(...)):
+    """Cria conta com status 'pendente' e redireciona com mensagem de espera."""
+    # Normaliza o email para evitar duplicatas por casing
+    email_clean = email.strip().lower()
+    hashed = _encode_admin_activation_password(password)
+    
     with SessionLocal() as session:
-        novo = Perfil(email=email, hashed_password=password, status="pendente")
+        if session.query(Perfil).filter(Perfil.email == email_clean).first():
+            erro = quote_plus("E-mail já cadastrado.")
+            return RedirectResponse(url=f"/admin-password?erro={erro}", status_code=303)
+            
+        novo = Perfil(nome=nome.strip(), email=email_clean, hashed_password=hashed, status="pendente", role="admin")
         session.add(novo)
         session.commit()
-    return JSONResponse({"message": "Cadastro realizado! Aguarde aprovação."})
+    
+    msg = quote_plus("Cadastro realizado! Aguarde a liberação do seu acesso pelo administrador.")
+    return RedirectResponse(url=f"/admin-password?msg={msg}", status_code=303)
 
 
 def _encode_admin_activation_password(password: str, iterations: int = 390000) -> str:
@@ -172,33 +168,9 @@ def _encode_admin_activation_password(password: str, iterations: int = 390000) -
 
 def _build_admin_activation_cookie(max_age_seconds: int = 600) -> str:
     exp = str(int(time.time()) + max_age_seconds)
-    secret = _get_admin_cookie_secret().encode("utf-8")
+    secret = get_admin_cookie_secret().encode("utf-8")
     signature = hmac.new(secret, exp.encode("utf-8"), hashlib.sha256).hexdigest()
     return f"{exp}.{signature}"
-
-
-def _is_admin_activation_granted(request: Request) -> bool:
-    raw = (request.cookies.get("admin_activation_ok") or "").strip()
-    if "." not in raw:
-        return False
-    exp, signature = raw.split(".", 1)
-    if not exp.isdigit():
-        return False
-    secret = _get_admin_cookie_secret()
-    if not secret:
-        return False
-    expected = hmac.new(secret.encode("utf-8"), exp.encode("utf-8"), hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(signature, expected):
-        return False
-    return int(exp) >= int(time.time())
-
-
-def _is_admin_mode_request(request: Request) -> bool:
-    is_granted = _is_admin_activation_granted(request)
-    # Considera modo admin apenas se tiver o cookie E (parâmetro admin=1 OU vindo do painel /admin)
-    has_admin_param = request.query_params.get("admin") == "1" or request.query_params.get("return") == "/admin"
-    return is_granted and has_admin_param
-
 
 # REMOVIDO: /login alias - não mais necessário
 
@@ -207,23 +179,40 @@ def _is_admin_mode_request(request: Request) -> bool:
 @router.get("/admin-password", response_class=HTMLResponse)
 def admin_password_page(request: Request):
     erro = request.query_params.get("erro")
+    msg = request.query_params.get("msg")
     return templates.TemplateResponse(
         request=request,
         name="admin-password.html",
-        context={"request": request, "erro": erro}
+        context={"request": request, "erro": erro, "msg": msg}
     )
 
 @router.post("/admin-password")
 def admin_password_post(email: str = Form(...), password: str = Form(...)):
-    # 1. Validar se o e-mail tem perfil admin
-    if not _verify_admin_email_role(email):
-        erro = quote_plus("Acesso negado: e-mail não autorizado ou sem permissão administrativa.")
-        return RedirectResponse(url=f"/admin-password?erro={erro}", status_code=303)
+    email_clean = email.strip().lower()
+    
+    with SessionLocal() as session:
+        perfil = session.query(Perfil).filter(Perfil.email == email_clean).first()
+        
+        if not perfil:
+            erro = quote_plus("Acesso negado: e-mail não cadastrado.")
+            return RedirectResponse(url=f"/admin-password?erro={erro}", status_code=303)
 
-    # 2. Validar a senha administrativa (shared secret)
-    if not _verify_admin_activation_password(password):
-        erro = quote_plus("Senha inválida.")
-        return RedirectResponse(url=f"/admin-password?erro={erro}", status_code=303)
+        # Normaliza valores vindos do banco para comparação segura
+        status_db = str(perfil.status or "").strip().lower()
+        role_db = str(perfil.role or "").strip().lower()
+
+        if status_db == "pendente":
+            erro = quote_plus("Seu acesso está aguardando liberação. Por favor, aguarde.")
+            return RedirectResponse(url=f"/admin-password?erro={erro}", status_code=303)
+
+        if status_db != "ativo" or role_db != "admin":
+            erro = quote_plus("Perfil inativo ou sem permissão de acesso.")
+            return RedirectResponse(url=f"/admin-password?erro={erro}", status_code=303)
+
+        # Valida contra o hash específico do usuário
+        if not _verify_password(password, perfil.hashed_password):
+            erro = quote_plus("Senha inválida.")
+            return RedirectResponse(url=f"/admin-password?erro={erro}", status_code=303)
 
     response = RedirectResponse(url="/admin", status_code=303)
     response.set_cookie(
@@ -259,7 +248,7 @@ def termo(request: Request):
         context={
             "request": request,
             "project_token": _extract_project_token(request),
-            "is_admin": _is_admin_mode_request(request)
+            "is_admin": is_admin_mode_request(request)
         }
     )
 
@@ -272,7 +261,7 @@ def ressalvas(request: Request):
         context={
             "request": request,
             "project_token": _extract_project_token(request),
-            "is_admin": _is_admin_mode_request(request)
+            "is_admin": is_admin_mode_request(request)
         }
     )
 
@@ -285,31 +274,25 @@ def nps(request: Request):
         context={
             "request": request,
             "project_token": _extract_project_token(request),
-            "is_admin": _is_admin_mode_request(request)
+            "is_admin": is_admin_mode_request(request)
         }
     )
 
 
 @router.get("/admin", response_class=HTMLResponse)
 def admin(request: Request):
-    if not _is_admin_activation_granted(request):
+    if not is_admin_activation_granted(request):
         return RedirectResponse(url="/admin-password", status_code=303)
 
     with SessionLocal() as session:
         # Busca todos os processos ordenados pelo mais recente
         processos_obj = session.query(Processo).order_by(Processo.criado_em.desc()).all()
-        # Converte para dicionário para manter compatibilidade com o template Jinja
-        processos = [p.__dict__ for p in processos_obj]
+        # Converte para dicionário filtrando metadados do SQLAlchemy
+        processos = [{k: v for k, v in p.__dict__.items() if k != '_sa_instance_state'} for p in processos_obj]
 
     for p in processos:
-        nps_dados = p.get("nps_dados")
-        if isinstance(nps_dados, str):
-            try:
-                nps_dados = json.loads(nps_dados)
-            except Exception:
-                nps_dados = {}
-        if not isinstance(nps_dados, dict):
-            nps_dados = {}
+        # Usa o utilitário para garantir que nps_dados seja sempre um dict
+        nps_dados = parse_json_object(p.get("nps_dados"))
         p["nps_dados"] = nps_dados
         # Garante que o link de acesso seja sempre para o index com o token
         p["link_acesso"] = f"{str(request.base_url).rstrip('/')}/index?project_token={p.get('project_token')}"
@@ -326,18 +309,10 @@ def admin(request: Request):
             p["codigo"] = p.get("project_token") or p.get("id")
 
         criado_em_raw = p.get("criado_em")
-        created_text = str(criado_em_raw or "").strip()
-        match_dt = re.match(r"^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})", created_text)
-        if match_dt:
-            yyyy, mm, dd, hh, mi = match_dt.groups()
-            p["criado_em_fmt"] = f"{dd}/{mm}/{yyyy} {hh}:{mi}"
+        if isinstance(criado_em_raw, datetime):
+            p["criado_em_fmt"] = criado_em_raw.strftime("%d/%m/%Y %H:%M")
         else:
-            match_d = re.match(r"^(\d{4})-(\d{2})-(\d{2})$", created_text)
-            if match_d:
-                yyyy, mm, dd = match_d.groups()
-                p["criado_em_fmt"] = f"{dd}/{mm}/{yyyy}"
-            else:
-                p["criado_em_fmt"] = created_text or "-"
+            p["criado_em_fmt"] = str(criado_em_raw or "-")
 
     q = (request.query_params.get("q") or "").strip().lower()
     if q:
@@ -394,7 +369,7 @@ def admin(request: Request):
 
 @router.post("/admin/gerar-processo")
 def admin_gerar_processo(request: Request):
-    if not _is_admin_activation_granted(request):
+    if not is_admin_activation_granted(request):
         raise HTTPException(status_code=403, detail="Acesso restrito ao administrador")
 
     token = uuid.uuid4().hex[:12].upper()
@@ -415,7 +390,7 @@ def admin_gerar_processo(request: Request):
 
 @router.post("/admin/update-project")
 def admin_update_project(request: Request, project_token: str = Form(...), projeto: str = Form("")):
-    if not _is_admin_activation_granted(request):
+    if not is_admin_activation_granted(request):
         raise HTTPException(status_code=403, detail="Acesso restrito")
 
     token = (project_token or "").strip()
@@ -428,6 +403,22 @@ def admin_update_project(request: Request, project_token: str = Form(...), proje
     
     return JSONResponse({"success": True})
 
+@router.post("/admin/usuarios/ativar")
+def admin_ativar_usuario(request: Request, email: str = Form(...)):
+    """Ativa um usuário pendente sem precisar de SQL manual."""
+    if not is_admin_activation_granted(request):
+        raise HTTPException(status_code=403, detail="Acesso restrito")
+
+    email_clean = email.strip().lower()
+    with SessionLocal() as session:
+        updated = session.query(Perfil).filter(Perfil.email == email_clean).update({"status": "ativo"})
+        session.commit()
+
+    if not updated:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    return JSONResponse({"success": True, "message": f"Usuário {email_clean} ativado com sucesso!"})
+
 @router.post("/admin/upload-foto-projeto")
 def admin_upload_foto_projeto(
     request: Request, 
@@ -435,7 +426,7 @@ def admin_upload_foto_projeto(
     observacao: str = Form(""),
     imagem: str = Form(...) # Base64 string
 ):
-    if not _is_admin_activation_granted(request):
+    if not is_admin_activation_granted(request):
         raise HTTPException(status_code=403, detail="Acesso restrito")
 
     if not projeto or not imagem:
@@ -468,7 +459,7 @@ def admin_expirar_token(
     request: Request,
     project_token: str = Form(...),
 ):
-    if not _is_admin_activation_granted(request):
+    if not is_admin_activation_granted(request):
         raise HTTPException(status_code=403, detail="Acesso restrito ao administrador")
 
 
@@ -504,7 +495,7 @@ def alterar_senha_acesso(
     confirmar_senha: str = Form(...)
 ):
     """Altera a senha global de ativação administrativa em configuracoes_seguras."""
-    if not _is_admin_activation_granted(request):
+    if not is_admin_activation_granted(request):
         raise HTTPException(status_code=403, detail="Sessão administrativa expirada ou inválida.")
 
     if nova_senha != confirmar_senha:
@@ -535,7 +526,7 @@ def admin_toggle_edit_lock(
     request: Request,
     project_token: str = Form(...),
 ):
-    if not _is_admin_activation_granted(request):
+    if not is_admin_activation_granted(request):
         raise HTTPException(status_code=403, detail="Acesso restrito ao administrador")
 
 

@@ -3,24 +3,13 @@ import json
 from fastapi import APIRouter, HTTPException
 from app.services.processo_repository import ProcessoRepository
 from app.services.processo_service import ProcessoService
-from app.services.supabase_client import supabase
 
 router = APIRouter(prefix="/api/processos", tags=["Processos"])
 
 
 @router.get("/ultimo-em-andamento")
 def obter_ultimo_processo_em_andamento():
-    res = (
-        supabase
-        .table("processos")
-        .select("codigo,project_token,status,atualizado_em,criado_em")
-        .order("atualizado_em", desc=True)
-        .order("criado_em", desc=True)
-        .limit(30)
-        .execute()
-    )
-
-    processos = res.data or []
+    processos = ProcessoRepository.get_recent_processes(limit=30)
     for processo in processos:
         status = str(processo.get("status") or "").strip().lower()
         identifier = processo.get("project_token") or processo.get("codigo")

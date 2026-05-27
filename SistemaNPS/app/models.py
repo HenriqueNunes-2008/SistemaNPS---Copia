@@ -10,6 +10,7 @@ class Perfil(Base):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String, unique=True, index=True, nullable=False)
+    nome = Column(String)
     hashed_password = Column(String, nullable=False)
     role = Column(String, default="user")
     status = Column(String, default="pendente") # pendente, ativo, bloqueado
@@ -40,6 +41,7 @@ class Processo(Base):
     pdf_final = Column(String)
     nps_nota = Column(Integer)
     
+    finalizado_em = Column(Date)
     project_token_ativo = Column(Boolean, default=True)
     project_token_expira_em = Column(DateTime)
     criado_em = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -69,3 +71,13 @@ class ProjetoFoto(Base):
     projeto = Column(String)
     observacao = Column(String)
     imagem_url = Column(String)
+
+class Resposta(Base):
+    """Tabela para armazenar respostas de formulários (anteriormente no Supabase)."""
+    __tablename__ = "respostas"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    cliente_id = Column(String, index=True, nullable=False)
+    pagina = Column(String, nullable=False)
+    dados = Column(JSONB)
+    criado_em = Column(DateTime, default=lambda: datetime.now(timezone.utc))

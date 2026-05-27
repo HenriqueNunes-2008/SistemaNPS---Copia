@@ -13,7 +13,8 @@ from reportlab.pdfgen import canvas
 
 from app.services.pdf_layout import content_bottom, content_top, draw_header_footer
 from app.services.processo_repository import ProcessoRepository
-from app.services.supabase_client import supabase
+from app.database import SessionLocal
+from app.models import Processo
 from app.services.upload import upload_pdf
 
 
@@ -558,11 +559,14 @@ def regenerate_final_pdf_by_codigo(codigo: str, set_status_finalizado: bool = Fa
 
     update_data = {
         "pdf_final": final_url,
-        "atualizado_em": datetime.now(timezone.utc).isoformat(),
+        "atualizado_em": datetime.now(timezone.utc),
     }
     if set_status_finalizado:
         update_data["status"] = "finalizado"
-        update_data["finalizado_em"] = date.today().isoformat()
+        update_data["finalizado_em"] = date.today()
 
-    supabase.table("processos").update(update_data).eq("id", proc["id"]).execute()
+    with SessionLocal() as db:
+        db.query(Processo).filter(Processo.id == proc["id"]).update(update_data)
+        db.commit()
+
     return final_url

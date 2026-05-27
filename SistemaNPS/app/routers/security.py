@@ -9,7 +9,6 @@ def get_admin_cookie_secret() -> str:
     """Recupera a chave secreta para assinatura de cookies administrativos."""
     return (
         os.getenv("ADMIN_ACTIVATION_COOKIE_SECRET")
-        or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
         or ""
     )
 

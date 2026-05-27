@@ -2,7 +2,7 @@ import uuid
 from typing import Optional, Dict, Any, List
 from app.database import SessionLocal
 from app.models import Processo, RessalvaItem
-from sqlalchemy import or_, String
+from sqlalchemy import or_, String, desc
 
 class ProcessoRepository:
     """Operações de banco migradas de Supabase para SQLAlchemy/PostgreSQL."""
@@ -21,6 +21,18 @@ class ProcessoRepository:
                 Processo.codigo == identifier
             )).first()
             return proc.__dict__ if proc else None
+
+    @staticmethod
+    def get_recent_processes(limit: int = 30) -> List[Dict[str, Any]]:
+        """Busca os processos mais recentes para verificar status em andamento."""
+        with SessionLocal() as session:
+            processos = (
+                session.query(Processo)
+                .order_by(desc(Processo.atualizado_em), desc(Processo.criado_em))
+                .limit(limit)
+                .all()
+            )
+            return [p.__dict__ for p in processos]
 
     @staticmethod
     def insert(data: Dict[str, Any]) -> Dict[str, Any]:

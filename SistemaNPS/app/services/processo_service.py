@@ -20,7 +20,7 @@ class ProcessoService:
         """Gera o codigo padrão: NOME_CPF3_DATA_RAND."""
         primeiro_nome = re.sub(r"[^A-Z]", "", nome_cliente.split()[0].upper())
         ultimos_cpf = re.sub(r"\D", "", cpf)[-3:]
-        data_hoje = datetime.now().strftime("%Y-%m-%d")
+        data_hoje = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         sufixo = "".join(random.choices(string.ascii_uppercase + string.digits, k=4))
         return f"{primeiro_nome}_{ultimos_cpf}_{data_hoje}_{sufixo}"
 
@@ -102,14 +102,14 @@ class ProcessoService:
         }
 
         if is_update:
-            payload["atualizado_em"] = datetime.utcnow().isoformat()
+            payload["atualizado_em"] = datetime.now(timezone.utc)
             result = ProcessoRepository.update(processo_uuid, payload)
             regenerate_final_pdf_by_codigo(result["codigo"], set_status_finalizado=False)
         else:
             payload["id"] = processo_uuid
             payload["codigo"] = cls.gerar_codigo_humano(data.nome_cliente, data.cpf)
             payload["status"] = "TERMO_GERADO"
-            payload["criado_em"] = datetime.utcnow().isoformat()
+            payload["criado_em"] = datetime.now(timezone.utc)
             result = ProcessoRepository.insert(payload)
         
         return result
@@ -143,13 +143,13 @@ class ProcessoService:
                 "processo_id": processo_uuid,
                 "item": img.item,
                 "descricao": img.descricao,
-                "prazo": img.prazo.isoformat() if img.prazo else None,
+                "prazo": img.prazo if img.prazo else None,
                 "aprovacao": img.aprovacao,
                 "imagem_hash": (
                     gerar_hash_imagem(img.imagem_base64)
                     if img.imagem_base64 and "," in img.imagem_base64 else None
                 ),
-                "criado_em": datetime.utcnow().isoformat()
+                "criado_em": datetime.now(timezone.utc)
             })
         
         if is_update:
@@ -166,7 +166,7 @@ class ProcessoService:
                 {
                     "item": img.item,
                     "descricao": img.descricao,
-                    "prazo": img.prazo.isoformat() if img.prazo else None,
+                    "prazo": img.prazo if img.prazo else None,
                     "responsavel": img.responsavel,
                     "observacao": img.observacao,
                     "aprovacao": img.aprovacao,
@@ -180,7 +180,7 @@ class ProcessoService:
             "status": "RESSALVAS_REGISTRADAS",
             "pdf_ressalvas": pdf_url,
             "ressalvas_dados": ressalvas_dados,
-            "atualizado_em": datetime.utcnow().isoformat()
+            "atualizado_em": datetime.now(timezone.utc)
         }
         ProcessoRepository.update(processo_uuid, payload_update)
 
@@ -203,9 +203,9 @@ class ProcessoService:
             "nps_nota": nps_nota,
         }
         if is_update:
-            update_data["atualizado_em"] = datetime.utcnow().isoformat()
+            update_data["atualizado_em"] = datetime.now(timezone.utc)
         else:
-            update_data["finalizado_em"] = date.today().isoformat()
+            update_data["finalizado_em"] = date.today()
 
         ProcessoRepository.update(processo_id, update_data)
 
