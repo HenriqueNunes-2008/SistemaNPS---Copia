@@ -130,6 +130,8 @@ def obter_dados_ressalvas(identificador: str, response: Response):
                     "item": row.get("item"),
                     "descricao": row.get("descricao"),
                     "prazo": row.get("prazo"),
+                    "responsavel": row.get("responsavel"),
+                    "observacao": row.get("observacao"),
                     "aprovacao": row.get("aprovacao"),
                     "imagem_hash": row.get("imagem_hash")
                 })

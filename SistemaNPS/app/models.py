@@ -55,6 +55,12 @@ class RessalvaItem(Base):
     processo_id = Column(UUID(as_uuid=True), ForeignKey("processos.id"))
     item = Column(String)
     descricao = Column(String)
+    prazo = Column(Date)
+    responsavel = Column(String)
+    observacao = Column(String)
+    aprovacao = Column(Boolean, default=False)
+    imagem_hash = Column(String)
+    criado_em = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class ConfiguracaoSegura(Base):
     """Configurações globais do sistema (ex: hash da senha admin)."""

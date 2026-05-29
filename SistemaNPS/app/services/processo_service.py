@@ -144,6 +144,8 @@ class ProcessoService:
                 "item": img.item,
                 "descricao": img.descricao,
                 "prazo": img.prazo if img.prazo else None,
+                "responsavel": img.responsavel,
+                "observacao": img.observacao,
                 "aprovacao": img.aprovacao,
                 "imagem_hash": (
                     gerar_hash_imagem(img.imagem_base64)
@@ -166,7 +168,7 @@ class ProcessoService:
                 {
                     "item": img.item,
                     "descricao": img.descricao,
-                    "prazo": img.prazo if img.prazo else None,
+                    "prazo": img.prazo.isoformat() if img.prazo else None,
                     "responsavel": img.responsavel,
                     "observacao": img.observacao,
                     "aprovacao": img.aprovacao,
